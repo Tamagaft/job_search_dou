@@ -14,12 +14,12 @@ func CreateInitialTables() error {
 
 	err = CreateWorksTable(DB)
 	if err != nil {
-		return err
+		return fmt.Errorf("can't create works table: %s", err)
 	}
 
 	err = CreateCategoriesTable(DB)
 	if err != nil {
-		return err
+		return fmt.Errorf("can't create categories table: %s", err)
 	}
 
 	return nil
@@ -51,8 +51,7 @@ func CreateCategoriesTable(DB *sql.DB) error {
 		CREATE TABLE IF NOT EXISTS categories
 		(
 			id INTEGER PRIMARY KEY,
-			title TEXT
-			UNIQUE(title)
+			title TEXT UNIQUE
 		)
 	`)
 	if err != nil {

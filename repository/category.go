@@ -9,7 +9,7 @@ const CATEGORIESCOUNT = 48
 
 type CategoryRepository struct{}
 
-func (cr CategoryRepository) Save(category types.Category) error {
+func (cr CategoryRepository) Save(title string) error {
 	DB := db.Connection()
 
 	statement, err := DB.Prepare(`
@@ -24,7 +24,7 @@ func (cr CategoryRepository) Save(category types.Category) error {
 		return err
 	}
 
-	statement.Exec(category.Title)
+	statement.Exec(title)
 	return err
 
 }

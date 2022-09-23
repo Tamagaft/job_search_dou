@@ -22,6 +22,4 @@ func main() {
 		parser.ParseSaveCategories(doc)
 	}
 
-
-	
 }
