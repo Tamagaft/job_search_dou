@@ -1,43 +1,64 @@
 package parser
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"searcher.com/test/config"
 	"searcher.com/test/repository"
 	"searcher.com/test/types"
 )
 
 func Manualupdate(html string) error {
-	data := strings.NewReader(html)
-	doc, err := goquery.NewDocumentFromReader(data)
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
 		return err
 	}
-	return ParseWork(doc)
+	return ParseSaveWorks(doc)
 }
 
-func ParseWork(doc *goquery.Document) error {
-	doc.Find(".lt").Find(".vacancy").Each(parseSaveWork)
+func DownloadParseWorks(category, experience string) error {
+	doc, _ := GetPageData(fmt.Sprintf("%s?category=%s&exp=%s", config.URL, category, experience))
+	// NON PANIC ERROR
+	return ParseSaveWorks(doc)
+}
+
+func ParseSaveWorks(doc *goquery.Document) error {
+	doc.Find(".lt").Find(".vacancy").Each(parseWorkPage)
 
 	return nil
 }
 
-func parseSaveWork(index int, item *goquery.Selection) {
+func parseWorkPage(index int, item *goquery.Selection) {
+	var wr repository.WorkRepository
 	work := types.Work{}
 
 	titleA := item.Find(".title").Find("a")
-	work.Title = strings.TrimSpace(titleA.Text())
 
 	link, _ := titleA.Attr("href")
+	work.Title = strings.TrimSpace(titleA.Text())
 	work.Link = strings.TrimSpace(link)
-
-	work.Company = strings.TrimSpace(item.Find(".company").Text())
-
-	work.Cities = strings.Split(strings.TrimSpace(item.Find(".cities").Text()), ", ")
 
 	work.SetHash()
 
-	var wr repository.WorkRepository
+	isSaved, _ := wr.IsSaved(work.Hash)
+	//non panic error
+	if isSaved {
+		return
+	}
+
+	workPage, _ := GetPageData(link)
+	//non panic error
+
+	work.Company = strings.TrimSpace(workPage.Find(".l-n").Find("a").Text())
+	workPage.Find(".breadcrumbs").Find("a").Each(func(i int, sel *goquery.Selection) {
+		if i == 2 {
+			work.Category = sel.Text()
+		}
+	})
+
+	work.Cities = strings.Split(strings.TrimSpace(workPage.Find(".sh-info").Find(".place").Text()), ", ")
+
 	wr.Save(work)
 }

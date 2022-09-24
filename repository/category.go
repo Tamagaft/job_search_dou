@@ -1,11 +1,10 @@
 package repository
 
 import (
+	"searcher.com/test/config"
 	"searcher.com/test/db"
 	"searcher.com/test/types"
 )
-
-const CATEGORIESCOUNT = 48
 
 type CategoryRepository struct{}
 
@@ -36,7 +35,7 @@ func (cr CategoryRepository) GetAllCategories() ([]*types.Category, error) {
 		return nil, err
 	}
 
-	result := make([]*types.Category, 0, CATEGORIESCOUNT)
+	result := make([]*types.Category, 0, config.CATEGORIESNUMBER)
 	var id int
 	var title string
 	for rows.Next() {
@@ -58,7 +57,7 @@ func (cr CategoryRepository) IsInitedCategories() (bool, error) {
 	}
 	var count int
 	rows.Scan(&count)
-	if count != CATEGORIESCOUNT {
+	if count != config.CATEGORIESNUMBER {
 		return false, nil
 	}
 	return true, nil

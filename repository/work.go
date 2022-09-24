@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"strings"
 
 	"searcher.com/test/db"
@@ -8,6 +9,8 @@ import (
 )
 
 type WorkRepository struct{}
+
+const EMPTYRESPONSE int64 = 0
 
 func (wr WorkRepository) Save(work types.Work) error {
 	DB := db.Connection()
@@ -34,6 +37,7 @@ func (wr WorkRepository) Save(work types.Work) error {
 		work.Company,
 		strings.Join(work.Cities[:], ", "),
 		work.Link,
+		work.Category,
 		work.Hash)
 
 	return err
@@ -54,4 +58,15 @@ func (wr WorkRepository) GetAllWork() ([]*types.Work, error) {
 		result = append(result, &types.Work{Id: id, Title: title, Company: company, Cities: strings.Split(cities, ","), Link: link, Category: category, Hash: hash})
 	}
 	return result, nil
+}
+
+func (wr WorkRepository) IsSaved(hash string) (bool, error) {
+	DB := db.Connection()
+	if err := DB.QueryRow("SELECT * FROM works where hash = ? ", "has").Scan(); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
