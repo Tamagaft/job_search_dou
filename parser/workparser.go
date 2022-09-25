@@ -6,6 +6,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"searcher.com/test/config"
+	"searcher.com/test/loger"
 	"searcher.com/test/repository"
 	"searcher.com/test/types"
 )
@@ -44,7 +45,7 @@ func parseWorkPage(index int, item *goquery.Selection) {
 
 	isSaved, _ := wr.IsSaved(work.Hash)
 	//non panic error
-	if isSaved {
+	if !isSaved {
 		return
 	}
 
@@ -61,4 +62,6 @@ func parseWorkPage(index int, item *goquery.Selection) {
 	work.Cities = strings.Split(strings.TrimSpace(workPage.Find(".sh-info").Find(".place").Text()), ", ")
 
 	wr.Save(work)
+
+	loger.Info(fmt.Sprintf("Work '%s' saved in db", work.Title))
 }

@@ -1,9 +1,11 @@
 package parser
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
+	"searcher.com/test/loger"
 )
 
 func GetPageData(url string) (*goquery.Document, error) {
@@ -24,5 +26,8 @@ func GetPageData(url string) (*goquery.Document, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	loger.Info(fmt.Sprintf("Downloaded page: %s", url))
+
 	return doc, nil
 }
